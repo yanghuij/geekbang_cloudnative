@@ -1,0 +1,45 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpserver
+spec:
+  gateways:
+    - httpserver
+  hosts:
+    - httpserver.yhj.io
+  http:
+  - match:
+    - uri:
+        exact: "/yhj/healthz"
+    rewrite:
+      uri: "/healthz"
+    route:
+      - destination:
+          host: httpserver.yhjhttpserver.svc.cluster.local
+          port:
+            number: 80
+  - match:
+    - uri:
+        prefix: "/"
+    rewrite:
+      uri: "/healthz"
+    route:
+      - destination:
+          host: httpserver.yhjhttpserver.svc.cluster.local
+          port:
+            number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: httpserver
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - httpserver.yhj.io
+      port:
+        name: http-simple
+        number: 80
+        protocol: HTTP
